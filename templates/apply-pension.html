@@ -148,7 +148,7 @@
         <p>Enter your 12-digit Aadhaar number</p>        
 
         <!-- Aadhaar Form -->
-        <form method="POST" action="#">
+        <form method="POST" action="{% url 'send_otp' %}">
             {% csrf_token %}
             <div class="aadhaar-group">
                 <input type="text" name="aadhaar_number"
@@ -172,7 +172,7 @@
             {% endif %}
         >
             <div class="otp-group">
-                <form method="POST" action="#">
+                <form method="POST" action="{% url 'verify_otp' %}">
                     {% csrf_token %}
 
                     <!-- Hidden Aadhaar -->
@@ -213,7 +213,7 @@
             <i class="fas fa-check-circle"></i> Aadhaar Verified Successfully
         </div>
 
-        <form method="POST" action="#" id="pensionForm" onsubmit="return validateForm()">
+        <form method="POST" action="{% url 'apply_pension' %}" id="pensionForm" onsubmit="return validateForm()">
             {% csrf_token %}
             
             <!-- Personal Info -->

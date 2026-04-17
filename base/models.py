@@ -28,3 +28,13 @@ class CitizenCard(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class PensionApplication(models.Model):
+    application_id = models.CharField(max_length=20, unique=True)
+    citizen_card = models.ForeignKey(CitizenCard, on_delete=models.CASCADE)
+    pension_type = models.CharField(choices=[('Old Age', 'Old Age'), ('Disability', 'Disability'), ('Widow', 'Widow')], default='Old Age', max_length=20)
+    status = models.CharField(choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Rejected', 'Rejected')], default='Pending', max_length=10)
+
+    def __str__(self):
+        return f"{self.application_id} - {self.citizen_card.name}"

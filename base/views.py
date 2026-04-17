@@ -1,4 +1,6 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render
+from .models import CitizenCard
+from django.http import JsonResponse
 
 # Create your views here.
 def home(request):
@@ -9,3 +11,101 @@ def apply_pension(request):
 
 def pension_status(request):
     return render(request, 'my-pension-status.html')
+
+def send_otp(request):
+    if request.method == 'POST':
+        aadhaar_number = request.POST.get('aadhaar_number')
+        # Here you would add logic to send the OTP to the user's registered mobile number
+        # For demonstration, we will just return a success message
+        request.session['aadhaar_number'] = aadhaar_number  # Store Aadhaar number in session for later verification
+        context = {
+            'otp_sent': True,
+            'aadhaar_number': aadhaar_number
+        }
+        return render(request, 'apply-pension.html', context)
+    
+    return render(request, 'apply-pension.html', {'otp_sent': False})
+
+def verify_otp(request):
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+        aadhaar = request.POST.get('aadhaar_number')
+
+
+
+        if otp == '123456':
+
+            user_data = CitizenCard.objects.filter(card_number=aadhaar).first()
+
+            return render(request, 'apply-pension.html', {
+                'verified': True,
+                'user_data': user_data
+            })
+
+        return render(request, 'apply-pension.html', {
+            'otp_sent': True,
+            'aadhaar_number': aadhaar,
+            'error': 'Invalid OTP'
+        })
+
+def apply_pension(request):
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name')
+        gender = request.POST.get('gender')
+        dob = request.POST.get('dob')
+        pension_type = request.POST.get('pension_type')
+
+        application_id = 'APP' + str(hash(full_name + dob))[:6]
+
+        citizen_card = request.session.get('aadhaar_number', 'Unknown')
+        if not citizen_card:
+            return JsonResponse({"error": "Session expired. Please verify Aadhaar again."})
+        citizen_obj = CitizenCard.objects.get(card_number=citizen_card)
+        
+        print(citizen_card)
+        PensionApplication.objects.create(
+            application_id=application_id,
+            citizen_card=citizen_obj,
+            pension_type=pension_type,
+        )
+
+
+        context = {
+            'success': True,
+            'application_id': application_id,
+            'application_submitted': True   # IMPORTANT for hiding form
+        }
+
+        pension_map = {
+            "old_age": 1,
+            "widow": 2,
+            "disability": 3
+        }
+
+        pension_value = pension_map.get(pension_type, 0)
+
+
+        age = citizen_obj.age
+        widow_status = citizen_obj.is_widow
+        disability_status = citizen_obj.is_disabled
+
+        # Example wallet (you should store this in DB)
+        user_wallet = request.session.get('wallet')
+        if not user_wallet:
+            return JsonResponse({"error": "Wallet not connected"})
+        
+        print("User wallet from session:", user_wallet)
+        tx_hash = register_on_blockchain(
+            user_wallet,
+            age,
+            pension_value,
+            widow_status,
+            disability_status,
+        )
+        
+        request.session['aadhaar_number'] = None
+
+        print("Blockchain TX:", tx_hash)
+
+        return render(request, 'apply-pension.html', context)
+    return render(request, 'apply-pension.html', {'otp_sent': False})
