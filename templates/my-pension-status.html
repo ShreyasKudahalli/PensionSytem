@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+<h1><i class="fas fa-user-check"></i> My Pension Status | Track Application</h1>
+{% endblock %}
+
+{% block content %}
+<div class="status-container">
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-card">
+            <h3><i class="fas fa-search"></i> Track Your Application</h3>
+            <div class="search-input-group">
+                <input type="text" placeholder="Enter Application ID / Aadhaar Number / Transaction Hash" id="searchInput">
+                <button id="searchBtn"><i class="fas fa-search"></i> Track</button>
+            </div>
+            <p class="search-help">Enter your application ID received via SMS or email</p>
+        </div>
+    </div>
+    
+    {% if application_submitted %}
+    <!-- Sample Application Status (Dynamic content) -->
+    <div class="status-card" id="statusCard">
+        <div class="status-header">
+            <div class="applicant-info">
+                <div class="applicant-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="applicant-details">
+                    <h4>Rajesh Kumar Sharma</h4>
+                    <p>Application ID: <span class="app-id">AP2024-00892</span></p>
+                    <p>Aadhaar: XXXX-XXXX-1234</p>
+                </div>
+            </div>
+            <div class="status-badge approved">
+                <i class="fas fa-check-circle"></i>
+                <span>Approved</span>
+            </div>
+        </div>
+        
+        <!-- Progress Timeline -->
+        <div class="progress-timeline">
+            <div class="timeline-step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-info">
+                    <h5>Application Submitted</h5>
+                    <p>December 15, 2024 - 10:30 AM</p>
+                    <span class="tx-hash">Tx: 0x7aB3...9fD2e</span>
+                </div>
+            </div>
+            <div class="timeline-step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-info">
+                    <h5>Document Verification</h5>
+                    <p>December 16, 2024 - 2:15 PM</p>
+                    <span class="tx-hash">Tx: 0x2c4e...8h7k1</span>
+                </div>
+            </div>
+            <div class="timeline-step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-info">
+                    <h5>Aadhaar & Bank Verification</h5>
+                    <p>December 18, 2024 - 11:00 AM</p>
+                </div>
+            </div>
+            <div class="timeline-step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-info">
+                    <h5>Blockchain Registration</h5>
+                    <p>December 20, 2024 - 3:30 PM</p>
+                    <span class="tx-hash">Tx: 0x3f8a...2d9c4</span>
+                </div>
+            </div>
+            <div class="timeline-step active">
+                <div class="step-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="step-info">
+                    <h5>Ready for Claim</h5>
+                    <p>Your pension is ready to be claimed</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Application Details -->
+        <div class="details-grid">
+            <div class="detail-card">
+                <div class="detail-label">Application Type</div>
+                <div class="detail-value">Old Age Pension</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Monthly Pension Amount</div>
+                <div class="detail-value">0.25 ETH (≈ ₹43,000)</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Bank Account (Last 4 digits)</div>
+                <div class="detail-value">XXXX-1234</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Available Balance</div>
+                <div class="detail-value">0.75 ETH (3 months)</div>
+            </div>
+        </div>
+        
+        <!-- Claim Pension Button Section -->
+        <div class="claim-section">
+            <div class="claim-info">
+                <i class="fas fa-info-circle"></i>
+                <span>Your pension for Dec 2024, Jan 2025, Feb 2025 is ready to be claimed on blockchain.</span>
+            </div>
+            
+            <button type="button" class="btn-claim" id="claimPensionBtn">
+                <i class="fas fa-hand-holding-usd"></i> Claim Pension on Blockchain
+            </button>
+            
+            <div class="claim-note">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Once claimed, the amount will be transferred to your connected wallet within 24 hours.</span>
+            </div>
+        </div>
+        
+        <!-- Blockchain Verification -->
+        <div class="blockchain-verification">
+            <div class="verification-header">
+                <i class="fab fa-ethereum"></i>
+                <span>Blockchain Verification Details</span>
+            </div>
+            <div class="verification-details">
+                <div class="verification-row">
+                    <span>Smart Contract:</span>
+                    <code>0x8f3E...a2b1C</code>
+                    <a href="#" class="verify-link">View on Etherscan →</a>
+                </div>
+                <div class="verification-row">
+                    <span>Application Hash:</span>
+                    <code>0x7aB3...9fD2e</code>
+                    <a href="#" class="verify-link">Verify →</a>
+                </div>
+                <div class="verification-row">
+                    <span>Block Number:</span>
+                    <span>4,523,891</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Past Payments Section -->
+    <div class="payments-section">
+        <div class="section-title">
+            <i class="fas fa-history"></i>
+            <span>Pension Payment History</span>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Transaction Hash</th>
+                        <th>Date</th>
+                        <th>Amount (ETH)</th>
+                        <th>Amount (INR)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentHistory">
+                    <tr>
+                        <td class="eth-address">0x9c4b...7h2k3</td>
+                        <td>Dec 15, 2024</td>
+                        <td>0.25 ETH</td>
+                        <td>₹43,125</td>
+                        <td><span class="badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td class="eth-address">0x2d7a...4e8f9</td>
+                        <td>Nov 15, 2024</td>
+                        <td>0.25 ETH</td>
+                        <td>₹42,890</td>
+                        <td><span class="badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td class="eth-address">0x8f3e...a2b1c</td>
+                        <td>Oct 15, 2024</td>
+                        <td>0.25 ETH</td>
+                        <td>₹42,500</td>
+                        <td><span class="badge-success">Completed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Support Section -->
+    <div class="support-section">
+        <div class="support-card">
+            <i class="fas fa-headset"></i>
+            <h4>Need Help?</h4>
+            <p>Contact our support team for assistance with your pension application</p>
+            <div class="support-links">
+                <a href="#"><i class="fas fa-phone"></i> Toll Free: 1800-XXX-XXXX</a>
+                <a href="#"><i class="fas fa-envelope"></i> support@pension.gov.in</a>
+            </div>
+        </div>
+        <div class="support-card">
+            <i class="fas fa-file-alt"></i>
+            <h4>Download Documents</h4>
+            <p>Access your application form and sanction letter</p>
+            <div class="support-links">
+                <a href="#"><i class="fas fa-download"></i> Application Form (PDF)</a>
+                <a href="#"><i class="fas fa-download"></i> Sanction Letter</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+<script>
+    // Sample JavaScript for handling claim button click
+    document.getElementById('claimPensionBtn').addEventListener('click', function() {
+        alert('Claiming pension on blockchain... (This is a demo action)');
+        // Here you would integrate with Web3 to send a transaction to the smart contract
+    });
+</script>
+{% endblock %}

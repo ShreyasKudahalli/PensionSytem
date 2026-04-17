@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+<h1><i class="fas fa-chart-line"></i> Transparency Dashboard | Blockchain Verified</h1>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Statistics Cards -->
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>Total Pension Fund (ETH)</span>
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-value" id="totalFund">4,892.45 ETH</div>
+            <div class="stat-label">≈ ₹42,89,00,000 INR</div>
+            <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i> +12.5% this quarter
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>Total Claimed Fund (ETH)</span>
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-value" id="totalClaimed">4,892.45 ETH</div>
+            <div class="stat-label">≈ ₹2,89,00,000 INR</div>
+            <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i> +12.5% this quarter
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>Active Beneficiaries</span>
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value" id="activeUsers">45,892</div>
+            <div class="stat-label">Citizens receiving pension</div>
+            <div class="stat-trend positive">
+                <i class="fas fa-chart-line"></i> +2,340 this year
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>Total Claims Processed</span>
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="stat-value">1,28,456</div>
+            <div class="stat-label">Since inception</div>
+            <div class="stat-trend positive">
+                <i class="fas fa-check-circle"></i> 99.8% approval rate
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <span>Smart Contract Status</span>
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="stat-value">Active</div>
+            <div class="stat-label">Audited by CertiK</div>
+            <div class="stat-trend secure">
+                <i class="fas fa-lock"></i> Fully Verified
+            </div>
+        </div>
+    </div>
+    
+    <!-- Blockchain Statistics -->
+    <div class="transparency-section">
+        <div class="section-title">
+            <i class="fas fa-cube"></i>
+            <span>Blockchain Network Statistics</span>
+        </div>
+        <div class="stats-grid">
+            <div class="info-card">
+                <div class="info-label">Network</div>
+                <div class="info-value">Ethereum Sepolia</div>
+                <div class="info-badge">Testnet</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Contract Address</div>
+                <div class="info-value eth-address">0x7aB3...9fD2e</div>
+                <div class="info-badge">Verified</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Gas Fee (Current)</div>
+                <div class="info-value">12 Gwei</div>
+                <div class="info-badge">Low</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Block Confirmations</div>
+                <div class="info-value">3,245</div>
+                <div class="info-badge">Secure</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Transactions -->
+    <div class="transparency-section">
+        <div class="section-title">
+            <i class="fas fa-history"></i>
+            <span>Recent Blockchain Transactions</span>
+            <a href="#" class="view-all">View All →</a>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Transaction Hash</th>
+                        <th>Type</th>
+                        <th>Beneficiary</th>
+                        <th>Amount (ETH)</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsTable"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Fund Allocation Chart -->
+    <div class="transparency-section">
+        <div class="section-title">
+            <i class="fas fa-chart-pie"></i>
+            <span>Fund Allocation by State</span>
+        </div>
+        <div class="allocation-grid">
+            <div class="state-item">
+                <div class="state-name">Uttar Pradesh</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 18%"></div>
+                </div>
+                <div class="state-percent">18%</div>
+            </div>
+            <div class="state-item">
+                <div class="state-name">Maharashtra</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 15%"></div>
+                </div>
+                <div class="state-percent">15%</div>
+            </div>
+            <div class="state-item">
+                <div class="state-name">Bihar</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 12%"></div>
+                </div>
+                <div class="state-percent">12%</div>
+            </div>
+            <div class="state-item">
+                <div class="state-name">West Bengal</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 10%"></div>
+                </div>
+                <div class="state-percent">10%</div>
+            </div>
+            <div class="state-item">
+                <div class="state-name">Tamil Nadu</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 9%"></div>
+                </div>
+                <div class="state-percent">9%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadDashboard() {
+    try {
+        const res = await fetch('/dashboard-stats/');
+        const data = await res.json();
+
+        document.getElementById('totalFund').innerText =
+            data.totalFund + " ETH";
+
+        document.getElementById('totalClaimed').innerText =
+            data.totalClaimed + " ETH";
+
+        document.getElementById('activeUsers').innerText =
+            data.activeUsers;
+
+        const table = document.getElementById('transactionsTable');
+        table.innerHTML = "";
+
+        data.transactions.forEach(tx => {
+            const row = `
+                <tr>
+                    <td class="eth-address">${tx.txHash.slice(0,10)}...</td>
+                    <td>Pension Claim</td>
+                    <td>${tx.user.slice(0,6)}...</td>
+                    <td>${tx.amount} ETH</td>
+                    <td>Just now</td>
+                    <td><span class="badge-success">Confirmed</span></td>
+                </tr>
+            `;
+            table.innerHTML += row;
+        });
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+window.addEventListener('load', loadDashboard);
+</script>
+{% endblock %}

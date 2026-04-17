@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+<h1><i class="fas fa-file-signature"></i> Apply for Pension</h1>
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Additional styles to ensure select elements get proper styling - NO changes to style.css */
+    .form-group select,
+    .form-group select.form-control,
+    select.form-control {
+        width: 100% !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid var(--border-light) !important;
+        border-radius: 10px !important;
+        padding: 10px 12px !important;
+        color: var(--text-primary) !important;
+        font-family: inherit !important;
+        font-size: 0.85rem !important;
+        cursor: pointer !important;
+        appearance: auto !important;
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+    }
+    
+    .form-group select:focus,
+    select.form-control:focus {
+        outline: none !important;
+        border-color: var(--indian-saffron) !important;
+        box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.1) !important;
+    }
+    
+    .form-group select option {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        padding: 10px !important;
+    }
+
+    /* Success Message Styles */
+    .success-message {
+        background: linear-gradient(135deg, rgba(19, 136, 8, 0.2), rgba(19, 136, 8, 0.1));
+        border: 2px solid var(--indian-green);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .success-message i {
+        font-size: 3rem;
+        color: var(--indian-green);
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .success-message h3 {
+        color: var(--indian-green-light);
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+    }
+
+    .success-message p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .application-id {
+        background: var(--bg-tertiary);
+        padding: 0.5rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 1.1rem;
+        display: inline-block;
+        margin-top: 0.5rem;
+        border: 1px solid var(--border-light);
+    }
+
+    .btn-view-status {
+        background: var(--indian-saffron);
+        color: var(--bg-primary);
+        padding: 10px 24px;
+        border: none;
+        border-radius: 40px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-view-status:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Hide form after submission */
+    .form-wrapper.hidden {
+        display: none;
+    }
+</style>
+
+<div class="application-container">
+    
+    <!-- Success Message (shown after form submission) -->
+    {% if success %}
+    <div class="success-message">
+        <i class="fas fa-check-circle"></i>
+        <h3>Application Submitted Successfully!</h3>
+        <p>Your pension application has been received and is being processed.</p>
+        <div class="application-id">
+            <i class="fas fa-hashtag"></i> Application ID: {{ application_id }}
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.85rem;">
+            <i class="fas fa-clock"></i> Estimated processing time: 7-10 business days
+        </p>
+        <a href="#" class="btn-view-status">
+            <i class="fas fa-chart-line"></i> Track Application Status
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Step 1 -->
+    <div id="step1" class="verification-card" 
+        {% if verified or application_submitted %}style="display:none;"{% endif %}>
+        
+        <div class="card-header">
+            <i class="fas fa-id-card"></i>
+            <h2>Verify with Aadhaar</h2>
+        </div>
+
+        <p>Enter your 12-digit Aadhaar number</p>        
+
+        <!-- Aadhaar Form -->
+        <form method="POST" action="#">
+            {% csrf_token %}
+            <div class="aadhaar-group">
+                <input type="text" name="aadhaar_number"
+                    class="aadhaar-input"
+                    placeholder="XXXX XXXX XXXX"
+                    maxlength="14"
+                    value="{{ aadhaar_number|default:'' }}"
+                    required>
+                <button type="submit" class="btn-send">
+                    {% if otp_sent %}Resend OTP{% else %}Send OTP{% endif %}
+                </button>
+            </div>
+        </form>
+
+        <!-- OTP Section -->
+        <div id="otpGroup"
+            {% if otp_sent and not verified and not application_submitted %}
+                style="display:block;"
+            {% else %}
+                style="display:none;"
+            {% endif %}
+        >
+            <div class="otp-group">
+                <form method="POST" action="#">
+                    {% csrf_token %}
+
+                    <!-- Hidden Aadhaar -->
+                    <input type="hidden" name="aadhaar_number" value="{{ aadhaar_number }}">
+
+                    <input type="text" name="otp"
+                        class="otp-input"
+                        placeholder="Enter 6-digit OTP"
+                        maxlength="6"
+                        required>
+
+                    <button type="submit" class="btn-verify">
+                        Verify
+                    </button>
+                </form>
+            </div>
+
+            <p class="resend">
+                <a href="#">Resend OTP</a>
+            </p>
+        </div>
+
+        {% if error %}
+        <p style="color:red;">{{ error }}</p>
+        {% endif %}
+
+        <div class="note">
+            <i class="fas fa-shield-alt"></i> Secure Verification
+        </div>
+    </div>
+
+
+    <!-- Step 2 - Form (hidden after successful submission) -->
+    <div id="step2" class="form-wrapper"
+        {% if verified and not application_submitted %}style="display:block;"{% elif application_submitted %}style="display:none;"{% else %}style="display:none;"{% endif %}
+    >
+        <div class="success-banner">
+            <i class="fas fa-check-circle"></i> Aadhaar Verified Successfully
+        </div>
+
+        <form method="POST" action="#" id="pensionForm" onsubmit="return validateForm()">
+            {% csrf_token %}
+            
+            <!-- Personal Info -->
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="full_name" id="full_name"
+                            value="{{ user_data.name|default:'' }}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select name="gender" id="gender" disabled>
+                            <option value="" >Select Gender</option>
+                            <option value="Male" {% if user_data.gender == "Male" %}selected{% endif %}>Male</option>
+                            <option value="Female" {% if user_data.gender == "Female" %}selected{% endif %}>Female</option>
+                            <option value="Other" {% if user_data.gender == "Other" %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" name="dob" id="dob"
+                            value="{{ user_data.dob|date:'Y-m-d'}}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" name="mobile" id="mobile"
+                            value="{{ user_data.phone_number|default:'0000000000' }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" id="email"
+                        value="{{ user_data.email|default:'' }}" readonly>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-section">
+                <h3><i class="fas fa-home"></i> Address Information</h3>
+
+                <div class="form-group">
+                    <label>Street Address</label>
+                    <input type="text" name="address" id="address"
+                        value="{{ user_data.address|default:'' }}" readonly>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" name="city" id="city"
+                            value="{{ user_data.city|default:'' }}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>State</label>
+                        <select name="state" id="state" disabled>
+                            <option value="">Select State</option>
+                            <option {% if user_data.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                            <option {% if user_data.state == "Maharashtra" %}selected{% endif %}>Maharashtra</option>
+                            <option {% if user_data.state == "Delhi" %}selected{% endif %}>Delhi</option>
+                            <option {% if user_data.state == "Tamil Nadu" %}selected{% endif %}>Tamil Nadu</option>
+                            <option {% if user_data.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                            <option {% if user_data.state == "West Bengal" %}selected{% endif %}>West Bengal</option>
+                            <option {% if user_data.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                            <option {% if user_data.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Pincode</label>
+                    <input type="text" name="pincode" id="pincode"
+                        value="{{ user_data.pincode|default:'' }}" readonly>
+                </div>
+            </div>
+
+            <!-- Bank -->
+            <div class="form-section">
+                <h3><i class="fas fa-university"></i> Bank Account Details</h3>
+
+                <div class="form-group">
+                    <label>Bank Name</label>
+                    <input type="text" name="bank_name" id="bank_name"
+                        value="{{ user_data.bank_name|default:'SBI' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>IFSC Code</label>
+                    <input type="text" name="ifsc" id="ifsc"
+                        value="{{ user_data.ifsc|default:'4465656' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" name="account_number" id="account_number"
+                        value="{{ user_data.account_number|default:'84154545' }}" required>
+                </div>
+            </div>
+
+            <!-- Pension -->
+            <div class="form-section">
+                <h3><i class="fas fa-piggy-bank"></i> Pension Scheme Details</h3>
+
+                <div class="form-group">
+                    <label>Pension Type</label>
+                    <select name="pension_type" id="pension_type" required>
+                        <option value="">Select Pension Scheme</option>
+                        <option value="old_age" {% if user_data.pension_type == "OLD_AGE" %}selected{% endif %}>Old Age Pension</option>
+                        <option value="widow" {% if user_data.pension_type == "WIDOW" %}selected{% endif %}>Widow Pension</option>
+                        <option value="disability" {% if user_data.pension_type == "DISABILITY" %}selected{% endif %}>Disability Pension</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Annual Income (₹)</label>
+                    <input type="number" name="income" id="income"
+                        value="{{ user_data.income|default:'20000.00' }}" readonly>
+                </div>
+            </div>
+
+            <!-- Declaration -->
+            <div class="declaration">
+                <label>
+                    <input type="checkbox" name="declaration" id="declaration" required>
+                    I hereby declare that all the information provided above is true and correct to the best of my knowledge. I understand that providing false information may lead to rejection of my application and legal action.
+                </label>
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" class="btn-back" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}
