@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from .models import CitizenCard
+from .models import CitizenCard, PensionApplication
 from django.http import JsonResponse
+from .web3_config import contract, w3, owner_address, private_key
 
 # Create your views here.
 def home(request):
@@ -48,6 +49,33 @@ def verify_otp(request):
             'error': 'Invalid OTP'
         })
 
+
+
+def register_on_blockchain(user_wallet, age, pension_type,is_married, is_disabled):
+
+    user_wallet = w3.to_checksum_address(user_wallet)
+
+    nonce = w3.eth.get_transaction_count(owner_address)
+
+    txn = contract.functions.registerUser(
+        user_wallet,
+        age,
+        pension_type,
+        is_married,
+        is_disabled,
+    ).build_transaction({
+        'from': owner_address,
+        'nonce': nonce,
+        'gas': 2000000,
+        'gasPrice': w3.to_wei('20', 'gwei')
+    })
+
+    signed_txn = w3.eth.account.sign_transaction(txn, private_key)
+
+    tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+
+    return w3.to_hex(tx_hash)
+
 def apply_pension(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
@@ -89,8 +117,9 @@ def apply_pension(request):
         widow_status = citizen_obj.is_widow
         disability_status = citizen_obj.is_disabled
 
+        user_wallet = 'uibyvvuijv nyugadsucbno'
         # Example wallet (you should store this in DB)
-        user_wallet = request.session.get('wallet')
+        ## user_wallet = request.session.get('wallet')
         if not user_wallet:
             return JsonResponse({"error": "Wallet not connected"})
         
