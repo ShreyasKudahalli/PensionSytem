@@ -8,7 +8,7 @@ w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
 assert w3.is_connected()
 
 # Contract address (YOUR deployed one)
-contract_address = "0x6f1149f24Aa5be5c26618092517FC437c8349082"
+contract_address = "0xeb5A8eC39e93c8bdC4268c3Fb6542ACB4ecfA54a"
 
 # Load ABI (copy from Remix)
 with open("base/PensionSystemABI.json") as f:

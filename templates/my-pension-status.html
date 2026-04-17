@@ -212,11 +212,297 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+
 <script>
-    // Sample JavaScript for handling claim button click
-    document.getElementById('claimPensionBtn').addEventListener('click', function() {
-        alert('Claiming pension on blockchain... (This is a demo action)');
-        // Here you would integrate with Web3 to send a transaction to the smart contract
+    async function claimPension() {
+        if (typeof window.ethereum === 'undefined') {
+            alert("MetaMask not installed");
+            return;
+        }
+
+        try {
+            // Get wallet
+            const accounts = await window.ethereum.request({
+                method: 'eth_requestAccounts'
+            });
+
+            const account = accounts[0];
+
+            // Your contract details
+            const contractAddress = "0xeb5A8eC39e93c8bdC4268c3Fb6542ACB4ecfA54a";
+
+            const abi = [
+                    {
+                        "inputs": [],
+                        "name": "claimPension",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "depositFunds",
+                        "outputs": [],
+                        "stateMutability": "payable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "constructor"
+                    },
+                    {
+                        "anonymous": false,
+                        "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                        ],
+                        "name": "FundsDeposited",
+                        "type": "event"
+                    },
+                    {
+                        "anonymous": false,
+                        "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "address",
+                            "name": "user",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                        ],
+                        "name": "PensionClaimed",
+                        "type": "event"
+                    },
+                    {
+                        "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "userAddr",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "age",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "enum PensionSystem.PensionType",
+                            "name": "pType",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "isMarried",
+                            "type": "bool"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "isDisabled",
+                            "type": "bool"
+                        }
+                        ],
+                        "name": "registerUser",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "anonymous": false,
+                        "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "address",
+                            "name": "user",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "age",
+                            "type": "uint256"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "enum PensionSystem.PensionType",
+                            "name": "pType",
+                            "type": "uint8"
+                        }
+                        ],
+                        "name": "UserRegistered",
+                        "type": "event"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "activeUsers",
+                        "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "getDashboardStats",
+                        "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_totalFund",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_remainingFund",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_activeUsers",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_totalClaimed",
+                            "type": "uint256"
+                        }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "owner",
+                        "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "totalClaimed",
+                        "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "totalFund",
+                        "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                        ],
+                        "name": "users",
+                        "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "age",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "enum PensionSystem.PensionType",
+                            "name": "pensionType",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "isEligible",
+                            "type": "bool"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "hasClaimed",
+                            "type": "bool"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "isMarried",
+                            "type": "bool"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "isDisabled",
+                            "type": "bool"
+                        }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                        ];
+
+            const web3 = new Web3(window.ethereum);
+            const contract = new web3.eth.Contract(abi, contractAddress);
+
+            // 🔥 CALL SMART CONTRACT
+            const tx = await contract.methods.claimPension().send({
+                from: account
+            });
+
+            console.log("TX SUCCESS:", tx);
+
+            alert("✅ Pension Claimed Successfully!\nTX: " + tx.transactionHash);
+
+        } catch (error) {
+            console.error(error);
+
+            if (error.message.includes("User not registered")) {
+                alert("❌ You are not registered on blockchain");
+            } else if (error.message.includes("Already claimed")) {
+                alert("❌ Pension already claimed");
+            } else {
+                alert("❌ Transaction failed");
+            }
+        }
+    }
+
+    // Attach button
+    document.getElementById("claimPensionBtn")
+        .addEventListener("click", claimPension);
+    document.getElementById('searchBtn').addEventListener('click', function() {
+        const searchValue = document.getElementById('searchInput').value;
+        if(searchValue) {
+            document.getElementById('statusCard').style.animation = 'fadeSlideUp 0.5s ease-out';
+            alert(`Searching for: ${searchValue}\n\nShowing latest application status.`);
+        } else {
+            alert('Please enter Application ID or Aadhaar number');
+        }
     });
 </script>
 {% endblock %}

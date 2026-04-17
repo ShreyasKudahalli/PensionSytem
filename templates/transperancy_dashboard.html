@@ -14,7 +14,7 @@
                 <span>Total Pension Fund (ETH)</span>
                 <i class="fas fa-coins"></i>
             </div>
-            <div class="stat-value" id="totalFund">4,892.45 ETH</div>
+            <div class="stat-value" id="totalFund">24,892.45 ETH</div>
             <div class="stat-label">≈ ₹42,89,00,000 INR</div>
             <div class="stat-trend positive">
                 <i class="fas fa-arrow-up"></i> +12.5% this quarter
@@ -47,13 +47,13 @@
         
         <div class="stat-card">
             <div class="stat-header">
-                <span>Total Claims Processed</span>
+                <span>Remaining Fund</span>
                 <i class="fas fa-file-invoice"></i>
             </div>
-            <div class="stat-value">1,28,456</div>
+            <div class="stat-value" id="remainingFund">1,28,456</div>
             <div class="stat-label">Since inception</div>
             <div class="stat-trend positive">
-                <i class="fas fa-check-circle"></i> 99.8% approval rate
+                <i class="fas fa-check-circle"></i>≈ ₹2,89,00,000 INR
             </div>
         </div>
         
@@ -184,6 +184,9 @@ async function loadDashboard() {
 
         document.getElementById('activeUsers').innerText =
             data.activeUsers;
+        
+        document.getElementById('remainingFund').innerText =
+            data.remainingFund + " ETH";
 
         const table = document.getElementById('transactionsTable');
         table.innerHTML = "";

@@ -3,16 +3,34 @@ from .models import CitizenCard, PensionApplication
 from django.http import JsonResponse
 from .web3_config import contract, w3, owner_address, private_key
 import random
+import json
 
 # Create your views here.
+def save_wallet(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        wallet = data.get("wallet")
+
+        # Save in session (simple way)
+        request.session['wallet'] = wallet
+
+        print("Wallet saved:", wallet)
+
+        return JsonResponse({"status": "success"})
+
+
 def home(request):
+    request.session['application_submitted'] = False
     return render(request, 'transperancy_dashboard.html')
 
-def apply_pension(request):
-    return render(request, 'apply-pension.html')
 
 def pension_status(request):
-    return render(request, 'my-pension-status.html')
+    application_submitted = request.session.get('application_submitted', False)
+    print("SET SESSION:", request.session.get('application_submitted'))
+    context = {
+        'application_submitted': application_submitted
+    }
+    return render(request, 'my-pension-status.html', context)
 
 def send_otp(request):
     if request.method == 'POST':
@@ -113,13 +131,13 @@ def apply_pension(request):
 
         pension_value = pension_map.get(pension_type, 0)
 
-
         age = citizen_obj.age
         widow_status = citizen_obj.is_widow
         disability_status = citizen_obj.is_disabled
 
         # Example wallet (you should store this in DB)
         user_wallet = request.session.get('wallet')
+        print("User wallet from session:", user_wallet)
         if not user_wallet:
             return JsonResponse({"error": "Wallet not connected"})
         
@@ -133,8 +151,49 @@ def apply_pension(request):
         )
         
         request.session['aadhaar_number'] = None
+        request.session['application_submitted'] = True
 
         print("Blockchain TX:", tx_hash)
 
         return render(request, 'apply-pension.html', context)
     return render(request, 'apply-pension.html', {'otp_sent': False})
+
+
+
+def get_dashboard_stats(request):
+    try:
+        stats = contract.functions.getDashboardStats().call()
+        print("Stats from contract:", stats)
+        print("Length:", len(stats))
+        total_fund = stats[0]
+        remaining_fund = stats[1]
+        active_users = stats[2]
+        total_claimed = stats[3]
+
+        events = contract.events.PensionClaimed.get_logs(
+            from_block=0,
+            to_block='latest'
+        )
+
+        tx_list = []
+        for e in events[-5:]:  # last 5 tx
+            tx_list.append({
+                "user": e['args']['user'],
+                "amount": w3.from_wei(e['args']['amount'], 'ether'),
+                "txHash": e['transactionHash'].hex()
+            })
+
+        return JsonResponse({
+            "totalFund": float(w3.from_wei(total_fund, 'ether')),
+            "remainingFund": float(w3.from_wei(remaining_fund, 'ether')),
+            "totalClaimed": float(w3.from_wei(total_claimed, 'ether')),
+            "activeUsers": active_users,
+            "transactions": tx_list
+        })
+
+    except Exception as e:
+        print("Error:", str(e))
+        return JsonResponse({"error": "Failed to fetch stats"})
+
+def claim_pension(request):
+    return JsonResponse({"status": "Use MetaMask for claiming"})
