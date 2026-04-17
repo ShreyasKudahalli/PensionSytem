@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .models import CitizenCard, PensionApplication
 from django.http import JsonResponse
 from .web3_config import contract, w3, owner_address, private_key
+import random
 
 # Create your views here.
 def home(request):
@@ -83,7 +84,7 @@ def apply_pension(request):
         dob = request.POST.get('dob')
         pension_type = request.POST.get('pension_type')
 
-        application_id = 'APP' + str(hash(full_name + dob))[:6]
+        application_id = 'APP' + random.randint(100000, 999999).__str__()
 
         citizen_card = request.session.get('aadhaar_number', 'Unknown')
         if not citizen_card:
@@ -117,9 +118,8 @@ def apply_pension(request):
         widow_status = citizen_obj.is_widow
         disability_status = citizen_obj.is_disabled
 
-        user_wallet = 'uibyvvuijv nyugadsucbno'
         # Example wallet (you should store this in DB)
-        ## user_wallet = request.session.get('wallet')
+        user_wallet = request.session.get('wallet')
         if not user_wallet:
             return JsonResponse({"error": "Wallet not connected"})
         

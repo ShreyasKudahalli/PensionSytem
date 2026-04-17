@@ -1,1 +1,5 @@
 venv
+base/PensionSystemABI.json
+base/migrations/
+base/__pycache__/
+base/web3_config.py
